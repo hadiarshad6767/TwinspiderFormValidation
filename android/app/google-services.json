@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "838772472111",
+    "project_id": "firestoreform-55194",
+    "storage_bucket": "firestoreform-55194.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:838772472111:android:3b47454fd2dfdd202f09da",
+        "android_client_info": {
+          "package_name": "com.twinspider.form_using_firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "838772472111-ne47udvld9uk04v0losfr6n79utst8ob.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuQiK2SOwkcMM8SULAe5_4IqcKxfeJFBM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "838772472111-ne47udvld9uk04v0losfr6n79utst8ob.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
