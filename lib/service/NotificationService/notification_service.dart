@@ -3,7 +3,8 @@
 import 'dart:developer';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:form_using_firebase/service/local_notifications_service.dart';
+
+import 'local_notifications_service.dart';
 
 Future<void> backgroundHandler(RemoteMessage message) async {
   log("message received inside handler! ${message.notification!.title} ");

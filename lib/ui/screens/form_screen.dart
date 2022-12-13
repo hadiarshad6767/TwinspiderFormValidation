@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:checkbox_formfield/checkbox_list_tile_formfield.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,6 +10,7 @@ import 'package:form_using_firebase/ui/utils/utils.dart';
 import 'package:form_using_firebase/ui/widget/round_button.dart';
 
 import '../../Constants/constants.dart';
+import '../../Model/user_model.dart';
 
 class FormScreen extends StatefulWidget {
   const FormScreen({super.key});
@@ -22,31 +22,32 @@ class FormScreen extends StatefulWidget {
 class _FormScreenState extends State<FormScreen> {
   final firestore = FirebaseFirestore.instance.collection('users');
   bool? checkboxIconFormFieldValue = false;
-  List<String> dropdownlist = ['country', 'Pakistan', 'India', 'China'];
+  List<Country> dropdownlist = [];
   bool loading = false;
   final _nameController = TextEditingController();
   final _formkey = GlobalKey<FormState>();
   Gender? gender = Gender.Male;
-  String dropdownValue = 'country';
-
+  Country dropdownValue = Country.country;
   @override
-  void dispose() {
+  void initState() {
     // ignore: todo
-    // TODO: implement dispose
-    super.dispose();
-    _nameController.dispose();
+    // TODO: implement initState
+    super.initState();
+    for (var value in Country.values) {
+      dropdownlist.add(value);
+    }
   }
 
-  void submit() {
-    String id = DateTime.now().microsecondsSinceEpoch.toString();
+  void submit(UserM user) {
+    // String id = DateTime.now().microsecondsSinceEpoch.toString();
     setState(() {
       loading = true;
     });
-    firestore.doc(id).set({
-      'id': id,
-      'name': _nameController.text.toString(),
-      'gender': gender!.name,
-      'country': dropdownValue
+    firestore.doc(user.id).set({
+      'id': user.id,
+      'name': user.name,
+      'gender': user.gender,
+      'country': user.country
     }).then((value) {
       setState(() {
         loading = false;
@@ -59,6 +60,14 @@ class _FormScreenState extends State<FormScreen> {
       });
       Utils().toastMessage(error.toString());
     });
+  }
+
+  @override
+  void dispose() {
+    // ignore: todo
+    // TODO: implement dispose
+    super.dispose();
+    _nameController.dispose();
   }
 
   @override
@@ -86,10 +95,8 @@ class _FormScreenState extends State<FormScreen> {
                             hintText: 'Name',
                             // helperText: 'enter email e.g abc@xyz.com',
                             prefixIcon: Icon(Icons.abc)),
-                        validator: (input) {
-                          input!.isEmpty ? "Enter name" : null;
-                          return null;
-                        },
+                        validator: (input) =>
+                            input!.isEmpty ? "Enter name" : null,
                       ),
                       Column(
                         children: <Widget>[
@@ -124,19 +131,20 @@ class _FormScreenState extends State<FormScreen> {
                       // const SizedBox(height: ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: DropdownButtonFormField<String?>(
+                        child: DropdownButtonFormField<Country>(
                           menuMaxHeight: 350,
                           value: dropdownValue,
-                          validator: (value) =>
-                              value == 'country' ? 'select country' : null,
-                          items: dropdownlist.map((String items) {
+                          validator: (value) => value!.name == 'country'
+                              ? 'select country'
+                              : null,
+                          items: dropdownlist.map((Country items) {
                             return DropdownMenuItem(
                                 value: items,
                                 child: Text(
-                                  items,
+                                  items.name,
                                 ));
                           }).toList(),
-                          onChanged: (String? value) {
+                          onChanged: (Country? value) {
                             setState(() {
                               dropdownValue = value!;
                             });
@@ -165,7 +173,14 @@ class _FormScreenState extends State<FormScreen> {
                 loading: loading,
                 onTap: () {
                   if (_formkey.currentState!.validate()) {
-                    submit();
+                    String id =
+                        DateTime.now().microsecondsSinceEpoch.toString();
+                    UserM user = UserM(
+                        country: dropdownValue.name,
+                        gender: gender!.name,
+                        id: id,
+                        name: _nameController.text.toString());
+                    submit(user);
                   }
                 },
               ),

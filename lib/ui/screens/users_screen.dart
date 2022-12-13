@@ -2,13 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
-import 'package:form_using_firebase/service/local_notifications_service.dart';
 import 'package:form_using_firebase/ui/screens/edit_screen.dart';
 import 'package:form_using_firebase/ui/utils/utils.dart';
 
 import '../../Constants/constants.dart';
-import '../../service/notification_service.dart';
+
+import '../../service/NotificationService/local_notifications_service.dart';
+import '../../service/NotificationService/notification_service.dart';
 import 'form_screen.dart';
+import '../../Model/user_model.dart';
 
 class UserScreen extends StatefulWidget {
   const UserScreen({super.key});
@@ -18,7 +20,7 @@ class UserScreen extends StatefulWidget {
 }
 
 class _UserScreenState extends State<UserScreen> {
-  String? country;
+  Country country = Country.country;
   Gender gender = Gender.Male;
   String? name;
   String? id;
@@ -65,26 +67,18 @@ class _UserScreenState extends State<UserScreen> {
                         itemBuilder: (context, index) {
                           return ListTile(
                             onTap: () {
-                              id = snapshot.data!.docs[index]['id'];
-                              name = snapshot.data!.docs[index]['name'];
-                              country = snapshot.data!.docs[index]['country'];
-
-                              if (snapshot.data!.docs[index]['gender'] ==
-                                  'Male') {
-                                gender = Gender.Male;
-                              } else {
-                                gender = Gender.Female;
-                              }
+                              UserM user1 = UserM(
+                                  id: snapshot.data!.docs[index]['id'],
+                                  name: snapshot.data!.docs[index]['name'],
+                                  country: snapshot.data!.docs[index]
+                                      ['country'],
+                                  gender: snapshot.data!.docs[index]['gender']);
 
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => EditFormScreen(
-                                            id: id.toString(),
-                                            country: country.toString(),
-                                            gender: gender,
-                                            name: name.toString(),
-                                          )));
+                                      builder: (context) =>
+                                          EditFormScreen(user: user1)));
                             },
                             title: Text(
                                 snapshot.data!.docs[index]['name'].toString()),

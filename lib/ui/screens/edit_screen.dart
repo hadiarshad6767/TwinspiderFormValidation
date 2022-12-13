@@ -1,23 +1,19 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:form_using_firebase/ui/utils/utils.dart';
 import 'package:form_using_firebase/ui/widget/round_button.dart';
 import '../../Constants/constants.dart';
+import '../../Model/user_model.dart';
 
 // ignore: must_be_immutable
 class EditFormScreen extends StatefulWidget {
-  String id;
-  String name;
-  Gender gender;
-  String country;
-  EditFormScreen(
-      {super.key,
-      required this.id,
-      required this.name,
-      required this.country,
-      required this.gender});
+  UserM user;
+
+  EditFormScreen({
+    super.key,
+    required this.user,
+  });
 
   @override
   State<EditFormScreen> createState() => _EditFormScreenState();
@@ -28,19 +24,34 @@ class _EditFormScreenState extends State<EditFormScreen> {
   final firestore = FirebaseFirestore.instance.collection('users');
   final ref = FirebaseFirestore.instance.collection('users');
   bool? checkboxIconFormFieldValue = false;
-  List<String> dropdownlist = ['country', 'Pakistan', 'India', 'China'];
+  List<Country> dropdownlist = [];
   bool loading = false;
   final _nameController = TextEditingController();
   final _formkey1 = GlobalKey<FormState>();
   Gender? gender = Gender.Male;
-  String dropdownValue = 'country';
+  Country dropdownValue = Country.country;
   @override
   void initState() {
+    for (var value in Country.values) {
+      dropdownlist.add(value);
+    }
+
     super.initState();
-    _nameController.text = widget.name;
-    gender = widget.gender;
-    log(gender!.name);
-    dropdownValue = widget.country;
+    _nameController.text = widget.user.name;
+    if (widget.user.gender == 'Male') {
+      gender = Gender.Male;
+    } else {
+      gender = Gender.Female;
+    }
+    if (widget.user.country == 'Pakistan') {
+      dropdownValue = Country.Pakistan;
+    } else if (widget.user.country == 'China') {
+      dropdownValue = Country.China;
+    } else if (widget.user.country == 'India') {
+      dropdownValue = Country.India;
+    } else {
+      dropdownValue = Country.country;
+    }
   }
 
   @override
@@ -51,14 +62,14 @@ class _EditFormScreenState extends State<EditFormScreen> {
     _nameController.dispose();
   }
 
-  void update() {
+  void update(UserM user) {
     setState(() {
       loading = true;
     });
-    ref.doc(widget.id).update({
-      'name': _nameController.text.toString(),
-      'gender': gender!.name,
-      'country': dropdownValue
+    ref.doc(widget.user.id).update({
+      'name': user.name,
+      'gender': user.gender,
+      'country': user.country
     }).then((value) {
       setState(() {
         loading = false;
@@ -88,8 +99,6 @@ class _EditFormScreenState extends State<EditFormScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    // mainAxisAlignment: MainAxisAlignment.center,
-                    // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       TextFormField(
                         // onChanged: (),
@@ -99,17 +108,8 @@ class _EditFormScreenState extends State<EditFormScreen> {
                             hintText: 'Name',
                             // helperText: 'enter email e.g abc@xyz.com',
                             prefixIcon: Icon(Icons.abc)),
-                        validator: (input) {
-                          input = _nameController.text;
-                          if (input.isEmpty) {
-                            check = true;
-                          } else {
-                            check = false;
-                          }
-                          input.isEmpty ? "Enter name" : null;
-                          return null;
-                          // input!.isEmpty ? "Enter name" : null;
-                        },
+                        validator: (input) =>
+                            input!.isEmpty ? "Enter name" : null,
                       ),
                       Column(
                         children: <Widget>[
@@ -142,19 +142,20 @@ class _EditFormScreenState extends State<EditFormScreen> {
                       // const SizedBox(height: ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: DropdownButtonFormField<String?>(
+                        child: DropdownButtonFormField<Country>(
                           menuMaxHeight: 350,
                           value: dropdownValue,
-                          validator: (value) =>
-                              value == 'country' ? 'select country' : null,
-                          items: dropdownlist.map((String items) {
+                          validator: (value) => value!.name == 'country'
+                              ? 'select country'
+                              : null,
+                          items: dropdownlist.map((Country items) {
                             return DropdownMenuItem(
                                 value: items,
                                 child: Text(
-                                  items,
+                                  items.name,
                                 ));
                           }).toList(),
-                          onChanged: (String? value) {
+                          onChanged: (Country? value) {
                             setState(() {
                               dropdownValue = value!;
                             });
@@ -182,10 +183,13 @@ class _EditFormScreenState extends State<EditFormScreen> {
                 title: 'Submit',
                 loading: loading,
                 onTap: () {
-                  if (check == true) {
-                    Utils().toastMessage("Please Enter Name");
-                  } else if (_formkey1.currentState!.validate()) {
-                    update();
+                  if (_formkey1.currentState!.validate()) {
+                    UserM user = UserM(
+                        country: dropdownValue.name,
+                        gender: gender!.name,
+                        id: widget.user.id,
+                        name: _nameController.text.toString());
+                    update(user);
                   }
                 },
               ),
